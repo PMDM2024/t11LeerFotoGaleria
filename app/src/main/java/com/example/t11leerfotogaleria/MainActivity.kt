@@ -1,5 +1,7 @@
 package com.example.t11leerfotogaleria
 
+import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -70,6 +72,8 @@ fun SeleccionarImagenDesdeGaleria() {
     val launcher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent(),
         onResult = { uri: Uri? ->
+            //persistirPermisoUri(context, uri!!)
+            guardarUri(context, uri!!)
             imagenUri = uri
         }
     )
@@ -84,11 +88,17 @@ fun SeleccionarImagenDesdeGaleria() {
         Button(onClick = { launcher.launch("image/*") }) {
             Text(text = "Seleccionar Imagen")
         }
-
+        Button(onClick = {
+            val uri = obtenerUri(context)
+            imagenUri = uri
+        }) {
+            Text(text = "recuperar Imagen")
+        }
         Spacer(modifier = Modifier.height(16.dp))
 
         // Mostrar la imagen seleccionada
         imagenUri?.let { uri ->
+
             AsyncImage(
                 model = uri,
                 contentDescription = null,
@@ -96,4 +106,22 @@ fun SeleccionarImagenDesdeGaleria() {
             )
         }
     }
+}
+fun guardarUri(context: Context, uri: Uri) {
+    val sharedPreferences = context.getSharedPreferences("MisDatos", Context.MODE_PRIVATE)
+    val editor = sharedPreferences.edit()
+    editor.putString("uriGuardada", uri.toString())  // Guarda la URI como cadena
+    editor.apply()  // Guarda los cambios de manera asíncrona
+
+}
+fun obtenerUri(context: Context): Uri? {
+    val sharedPreferences = context.getSharedPreferences("MisDatos", Context.MODE_PRIVATE)
+    val uriString = sharedPreferences.getString("uriGuardada", null)
+    return uriString?.let { Uri.parse(it) }  // Convierte la cadena de vuelta a URI
+}
+fun persistirPermisoUri(context: Context, uri: Uri) {
+    context.contentResolver.takePersistableUriPermission(
+        uri,
+        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+    )
 }
