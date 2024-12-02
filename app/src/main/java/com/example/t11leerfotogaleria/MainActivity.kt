@@ -51,11 +51,11 @@ class MainActivity : ComponentActivity() {
         setContent {
             T11LeerFotoGaleriaTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    //SeleccionarImagenDesdeGaleria()
+                    SeleccionarImagenDesdeGaleria()
                    // CameraWithIntent()
                     //CameraXScreen()
                     //CameraWithIntent()
-                    CamaraX2View()
+                    //CamaraX2View()
 
                 }
             }
