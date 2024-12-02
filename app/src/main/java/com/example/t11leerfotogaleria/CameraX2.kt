@@ -86,7 +86,8 @@ fun CamaraX2View() {
     // Corutina para lanzar la solicitud de permiso de la camara
     LaunchedEffect(key1 = Unit) {
         //permisoCamaraState.launchPermissionRequest()
-        permissions.launchMultiplePermissionRequest()
+        if (!permissions.allPermissionsGranted)
+             permissions.launchMultiplePermissionRequest()
     }
 
     Scaffold(
@@ -129,23 +130,7 @@ fun CamaraX2View() {
                           .padding(it)
                   )
               }
-              /*Image(
-                  painter = painterResource(id = R.drawable.small_image), // Reemplaza con tu imagen
-                  contentDescription = "Imagen pequeña",
-                  contentScale = ContentScale.Crop,
 
-              )*/
-              /*AsyncImage(
-                  //model = uri,
-                  model= R.drawable.android3,
-                  contentDescription = null,
-                  modifier = Modifier
-                      .size(width = 200.dp, height = 300.dp) // Tamaño de 200x300 dp
-                      .clip(RoundedCornerShape(16.dp)) // Esquinas redondeadas
-                      .align(Alignment.BottomStart) // Posición abajo a la izquierda
-                      .padding(16.dp) // Margen desde el borde de la pantalla
-                      .border(2.dp, Color.White, RoundedCornerShape(8.dp))
-              )*/
               imagenUri.value?.let { uri ->
                   AsyncImage(
                       model = uri,
