@@ -1,24 +1,26 @@
 package com.example.t11leerfotogaleria
 
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.widget.Toast
+import android.provider.MediaStore
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,8 +32,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
@@ -40,8 +43,6 @@ import com.example.t11leerfotogaleria.ui.theme.utils.loadFromUri
 import com.example.t11leerfotogaleria.ui.theme.utils.saveBitmapImage
 import kotlinx.coroutines.launch
 import java.io.File
-import java.text.SimpleDateFormat
-import kotlin.text.format
 
 
 class MainActivity : ComponentActivity() {
@@ -98,7 +99,7 @@ fun SeleccionarImagenDesdeGaleria() {
             }
         }
     )
-    val launcherPhoto = rememberLauncherForActivityResult(
+    val launcherPhotoPreview = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview(),
         onResult = { bitmap ->
             if (bitmap != null) {
@@ -109,6 +110,20 @@ fun SeleccionarImagenDesdeGaleria() {
                 }
             }
         }
+    )
+    var uriRemp:Uri?=null
+    val launcherPhoto = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture(),
+        onResult = { bitmap ->
+            if (bitmap ) {
+                scope.launch {
+                   // imagenUri = saveBitmapImage(context, bitmap)
+                    guardarUri(context, uriRemp!!)
+                    imagenUri = uriRemp
+                }
+            }
+        }
+    )
        /* contract = ActivityResultContracts.TakePicture(),
         onResult = { success ->
             if (success) {
@@ -117,7 +132,7 @@ fun SeleccionarImagenDesdeGaleria() {
                 Toast.makeText(context, "Error al tomar la foto", Toast.LENGTH_SHORT).show()
             }
         }*/
-    )
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -130,9 +145,26 @@ fun SeleccionarImagenDesdeGaleria() {
         }
         Button(onClick = {
 
-            launcherPhoto.launch()
+            launcherPhotoPreview.launch()
             // photoFile = createImageFile(context)
            // launcherPhoto.launch(Uri.fromFile(photoFile))
+        }) {
+            Text(text = "Hacer Foto preview")
+        }
+        Button(onClick = {
+            val directorio =
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).absoluteFile
+            val resolver = context.contentResolver
+            val contentValues = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, "photo_${System.currentTimeMillis()}.jpg")
+                put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg")
+                put(MediaStore.Images.ImageColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES)
+            }
+            resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            uriRemp = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+            launcherPhoto.launch(uriRemp!!)
+            // photoFile = createImageFile(context)
+            // launcherPhoto.launch(Uri.fromFile(photoFile))
         }) {
             Text(text = "Hacer Foto")
         }
@@ -150,7 +182,11 @@ fun SeleccionarImagenDesdeGaleria() {
             AsyncImage(
                 model = uri,
                 contentDescription = null,
-                modifier = Modifier.size(200.dp)
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+                    .clip(RoundedCornerShape(16.dp)) // Borde redondeado
+                    .border(2.dp, Color.White, RoundedCornerShape(16.dp))
             )
         }
     }

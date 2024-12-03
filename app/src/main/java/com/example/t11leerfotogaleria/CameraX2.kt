@@ -61,7 +61,9 @@ import java.util.concurrent.Executor
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun CamaraX2View() {
+fun CamaraX2View(
+
+) {
     val permissions = rememberMultiplePermissionsState(
         permissions = mutableListOf(
             android.Manifest.permission.CAMERA
